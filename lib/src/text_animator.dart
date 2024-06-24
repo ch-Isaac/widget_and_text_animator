@@ -93,7 +93,19 @@ class _TextAnimatorState extends State<TextAnimator> {
     List<String> temp = [];
     temp = _text.split(' ');
     for (var element in temp) {
-      _words.add(element = '$element ');
+      if (element.contains('\n')) {
+        final split = element.split('\n');
+        for (var s in split) {
+          if (!s.trim().isEmpty) {
+            _words.add('$s ');
+            if (s != split.last) {
+              _words.add('\n');
+            }
+          }
+        }
+      } else {
+        _words.add('$element ');
+      }
     }
     _words.last = _words.last.trim();
 
@@ -152,40 +164,42 @@ class _TextAnimatorState extends State<TextAnimator> {
           style: widget.style,
           children: [
             for (int i = 0; i < _words.length; i++)
-              WidgetSpan(
-                  child: Wrap(
-                children: [
-                  for (int j = 0; j < (_words[i]).characters.length; j++)
-                    WidgetAnimator(
-                        incomingEffect: WidgetTransitionEffects.withStyle(
-                          opacity: widget.incomingEffect?.opacity,
-                          scale: widget.incomingEffect?.scale,
-                          offset: widget.incomingEffect?.offset,
-                          rotation: widget.incomingEffect?.rotation,
-                          blur: widget.incomingEffect?.blur,
-                          curve: widget.incomingEffect?.curve,
-                          skew: widget.incomingEffect?.skew,
-                          duration: widget.incomingEffect?.duration,
-                          builder: widget.incomingEffect?.builder,
-                          style: widget.incomingEffect?.style ??
-                              WidgetTransitionEffectStyle.none,
-                          delay: _incomingDelays[i][j],
-                        ),
-                        outgoingEffect: widget.outgoingEffect,
-                        atRestEffect: widget.atRestEffect,
-                        onIncomingAnimationComplete: (_isLastCharacter(i, j))
-                            ? widget.onIncomingAnimationComplete
-                            : null,
-                        onOutgoingAnimationComplete: (_isLastCharacter(i, j))
-                            ? _triggerLastOutgoingAnimation
-                            : null,
-                        child: Text(
-                          _words[i].characters.characterAt(j).string,
-                          key: ValueKey('$_text-text$i-$j-$_outgoing'),
-                          style: widget.style,
-                        ))
-                ],
-              )),
+              _words[i].trim().isEmpty
+                  ? const TextSpan(text: '\n')
+                  : WidgetSpan(
+                        child: Wrap(
+                      children: [
+                        for (int j = 0; j < (_words[i]).characters.length; j++)
+                          WidgetAnimator(
+                              incomingEffect: WidgetTransitionEffects.withStyle(
+                                opacity: widget.incomingEffect?.opacity,
+                                scale: widget.incomingEffect?.scale,
+                                offset: widget.incomingEffect?.offset,
+                                rotation: widget.incomingEffect?.rotation,
+                                blur: widget.incomingEffect?.blur,
+                                curve: widget.incomingEffect?.curve,
+                                skew: widget.incomingEffect?.skew,
+                                duration: widget.incomingEffect?.duration,
+                                builder: widget.incomingEffect?.builder,
+                                style: widget.incomingEffect?.style ??
+                                    WidgetTransitionEffectStyle.none,
+                                delay: _incomingDelays[i][j],
+                              ),
+                              outgoingEffect: widget.outgoingEffect,
+                              atRestEffect: widget.atRestEffect,
+                              onIncomingAnimationComplete: (_isLastCharacter(i, j))
+                                  ? widget.onIncomingAnimationComplete
+                                  : null,
+                              onOutgoingAnimationComplete: (_isLastCharacter(i, j))
+                                  ? _triggerLastOutgoingAnimation
+                                  : null,
+                              child: Text(
+                                _words[i].characters.characterAt(j).string,
+                                key: ValueKey('$_text-text$i-$j-$_outgoing'),
+                                style: widget.style,
+                              ))
+                      ],
+                    )),
           ],
         ));
   }
